@@ -1,6 +1,7 @@
 from fastapi import FastAPI, Response, Request
-from database import init_db, insert_email, mark_as_opened
+from database import get_connection, init_db, insert_email, mark_as_opened
 from utils import generate_uuid
+
 
 app = FastAPI()
 
@@ -39,3 +40,14 @@ def track(uid: str, request: Request) :
     )
 
     return Response(content = pixel, media_type = "image/png")
+
+
+@app.get("/get-data")
+def get_data() :
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("select * from email_tracking")
+    data = cursor.fetchall()
+    conn.close()
+
+    return {"data" : data}
