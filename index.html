@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Email Tracker</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: #0f0f13;
+      color: #e2e2e2;
+      min-height: 100vh;
+    }
+
+    header {
+      background: #1a1a24;
+      border-bottom: 1px solid #2a2a3a;
+      padding: 18px 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    header h1 { font-size: 1.2rem; font-weight: 600; color: #fff; }
+    header h1 span { color: #7c6af7; }
+
+    .refresh-btn {
+      background: #2a2a3a;
+      color: #aaa;
+      border: none;
+      border-radius: 8px;
+      padding: 7px 16px;
+      font-size: 0.82rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.2s, color 0.2s;
+    }
+    .refresh-btn:hover { background: #33334a; color: #e2e2e2; }
+
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 28px 24px;
+    }
+
+    /* Stat cards */
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px;
+      margin-bottom: 24px;
+    }
+
+    .stat {
+      background: #1a1a24;
+      border: 1px solid #2a2a3a;
+      border-radius: 12px;
+      padding: 18px 20px;
+    }
+
+    .stat .label {
+      font-size: 0.75rem;
+      color: #777;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      margin-bottom: 8px;
+    }
+
+    .stat .value {
+      font-size: 1.9rem;
+      font-weight: 700;
+      color: #fff;
+      line-height: 1;
+    }
+
+    .stat.opened .value { color: #22c55e; }
+    .stat.sent .value   { color: #f59e0b; }
+    .stat.proxy .value  { color: #ef4444; }
+
+    /* Table card */
+    .card {
+      background: #1a1a24;
+      border: 1px solid #2a2a3a;
+      border-radius: 12px;
+      padding: 20px 24px;
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+
+    .card-header h2 {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #888;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+      border-radius: 8px;
+      border: 1px solid #2a2a3a;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.84rem;
+    }
+
+    thead tr { background: #1f1f2e; }
+
+    th {
+      text-align: left;
+      padding: 11px 14px;
+      color: #777;
+      font-weight: 600;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      border-bottom: 1px solid #2a2a3a;
+      white-space: nowrap;
+    }
+
+    td {
+      padding: 11px 14px;
+      border-bottom: 1px solid #1e1e2a;
+      color: #ccc;
+      vertical-align: middle;
+    }
+
+    tbody tr:last-child td { border-bottom: none; }
+    tbody tr:hover { background: #1e1e2c; }
+
+    .status-badge {
+      display: inline-block;
+      border-radius: 20px;
+      padding: 3px 10px;
+      font-size: 0.73rem;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+    }
+
+    .status-opened { background: #22c55e22; color: #22c55e; border: 1px solid #22c55e44; }
+    .status-sent   { background: #f59e0b22; color: #f59e0b; border: 1px solid #f59e0b44; }
+
+    .proxy-badge {
+      display: inline-block;
+      background: #ef444422;
+      color: #ef4444;
+      border: 1px solid #ef444444;
+      border-radius: 20px;
+      padding: 2px 8px;
+      font-size: 0.7rem;
+      font-weight: 600;
+    }
+
+    .ts { color: #666; font-size: 0.78rem; }
+    .email-cell { color: #e2e2e2; }
+    .count-cell { color: #7c6af7; font-weight: 600; }
+
+    .empty-state {
+      text-align: center;
+      padding: 48px 0;
+      color: #555;
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>ikshan <span>tracker</span></h1>
+  <button class="refresh-btn" onclick="loadData()">↻ Refresh</button>
+</header>
+
+<div class="container">
+
+  <!-- Summary stats -->
+  <div class="stats">
+    <div class="stat">
+      <div class="label">Total Emails</div>
+      <div class="value" id="statTotal">—</div>
+    </div>
+    <div class="stat opened">
+      <div class="label">Opened</div>
+      <div class="value" id="statOpened">—</div>
+    </div>
+    <div class="stat sent">
+      <div class="label">Not Opened</div>
+      <div class="value" id="statSent">—</div>
+    </div>
+    <div class="stat proxy">
+      <div class="label">Proxy Detected</div>
+      <div class="value" id="statProxy">—</div>
+    </div>
+  </div>
+
+  <!-- Table -->
+  <div class="card">
+    <div class="card-header">
+      <h2>All Emails</h2>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Email</th>
+            <th>Status</th>
+            <th>Opens</th>
+            <th>Sent At</th>
+            <th>Opened At</th>
+            <th>IP</th>
+            <th>Proxy</th>
+          </tr>
+        </thead>
+        <tbody id="tableBody">
+          <tr><td colspan="7"><div class="empty-state">Loading…</div></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  const BASE = 'https://email-tracker-azure-seven.vercel.app';
+
+  function fmtDate(ts) {
+    if (!ts) return '—';
+    return new Date(ts).toLocaleString();
+  }
+
+  function esc(str) {
+    return String(str ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  async function loadData() {
+    const tbody = document.getElementById('tableBody');
+    tbody.innerHTML = '<tr><td colspan="7"><div class="empty-state">Loading…</div></td></tr>';
+
+    try {
+      const res = await fetch(BASE + '/get-data');
+      const json = await res.json();
+      const rows = json.data || [];
+
+      // Stats
+      const opened = rows.filter(r => r.status === 'OPENED').length;
+      const proxies = rows.filter(r => r.is_proxy).length;
+      document.getElementById('statTotal').textContent  = rows.length;
+      document.getElementById('statOpened').textContent = opened;
+      document.getElementById('statSent').textContent   = rows.length - opened;
+      document.getElementById('statProxy').textContent  = proxies;
+
+      if (!rows.length) {
+        tbody.innerHTML = '<tr><td colspan="7"><div class="empty-state">No emails tracked yet.</div></td></tr>';
+        return;
+      }
+
+      // Sort: opened first, then by sent_at desc
+      rows.sort((a, b) => {
+        if (a.status === b.status) return new Date(b.sent_at) - new Date(a.sent_at);
+        return a.status === 'OPENED' ? -1 : 1;
+      });
+
+      tbody.innerHTML = rows.map(r => `
+        <tr>
+          <td class="email-cell">${esc(r.email)}</td>
+          <td><span class="status-badge ${r.status === 'OPENED' ? 'status-opened' : 'status-sent'}">${r.status}</span></td>
+          <td class="count-cell">${r.open_count ?? 0}</td>
+          <td class="ts">${fmtDate(r.sent_at)}</td>
+          <td class="ts">${fmtDate(r.opened_at)}</td>
+          <td class="ts">${esc(r.ip || '—')}</td>
+          <td>${r.is_proxy ? '<span class="proxy-badge">PROXY</span>' : '<span style="color:#444">—</span>'}</td>
+        </tr>
+      `).join('');
+    } catch (e) {
+      tbody.innerHTML = `<tr><td colspan="7"><div class="empty-state">Error: ${esc(e.message)}</div></td></tr>`;
+    }
+  }
+
+  loadData();
+</script>
+</body>
+</html>

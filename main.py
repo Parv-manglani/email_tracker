@@ -1,9 +1,17 @@
 from fastapi import FastAPI, Response, Request
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from database import get_connection, init_db, insert_email, mark_as_opened
 from utils import generate_uuid
 
 app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 class CreateEmailRequest(BaseModel):
