@@ -75,28 +75,16 @@ def mark_as_opened(uid, ip, user_agent):
     # 🔹 Step 2: time diff calculate
     time_diff = (current_time - sent_at).total_seconds()
 
-    # 🔹 Step 3: proxy detection
-    is_proxy = False
-
-    # ⏱️ Time-based check
-    if time_diff < 3:
-        is_proxy = True
-
-    # 🤖 User-Agent check (Google proxy)
-    if user_agent and "GoogleImageProxy" in user_agent:
-        is_proxy = True
-
-    # 🍏 Apple Mail proxy (basic detection)
-    if user_agent and "AppleWebKit" in user_agent and "Mobile" not in user_agent:
-        is_proxy = True
+    # 🔥 ONLY TIME-BASED FILTER
+    is_proxy = time_diff < 3   # < 3 sec = proxy
 
     print(f"UID: {uid}")
     print(f"Time diff: {time_diff}")
     print(f"IP: {ip}")
     print(f"UA: {user_agent}")
-    print(f"Proxy: {is_proxy}")
+    print(f"Proxy (time-based): {is_proxy}")
 
-    # 🔹 Step 4: update DB
+    # 🔹 Step 3: update DB
     if is_proxy:
         cursor.execute("""
             UPDATE email_tracking
