@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from database import get_connection, init_db, insert_email, mark_as_opened
 from utils import generate_uuid
+from email_verifier import verify_email
 
 app = FastAPI()
 
@@ -64,6 +65,13 @@ def track(uid: str, request: Request):
     )
 
     return Response(content=pixel, media_type="image/png")
+
+
+# 🔹 Verify email
+@app.get("/verify-email")
+def verify_email_endpoint(email: str):
+    result = verify_email(email)
+    return result
 
 
 # 🔹 Get all data
