@@ -17,7 +17,7 @@
     header {
       background: #1a1a24;
       border-bottom: 1px solid #2a2a3a;
-      padding: 18px 32px;
+      padding: 16px 32px;
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -25,6 +25,8 @@
 
     header h1 { font-size: 1.2rem; font-weight: 600; color: #fff; }
     header h1 span { color: #7c6af7; }
+
+    .header-right { display: flex; align-items: center; gap: 12px; }
 
     .refresh-btn {
       background: #2a2a3a;
@@ -39,17 +41,42 @@
     }
     .refresh-btn:hover { background: #33334a; color: #e2e2e2; }
 
+    /* Tabs */
+    .tabs {
+      display: flex;
+      gap: 4px;
+      background: #1a1a24;
+      border-bottom: 1px solid #2a2a3a;
+      padding: 0 32px;
+    }
+
+    .tab {
+      padding: 12px 18px;
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: #666;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      transition: color 0.2s, border-color 0.2s;
+    }
+
+    .tab:hover { color: #aaa; }
+    .tab.active { color: #7c6af7; border-bottom-color: #7c6af7; }
+
     .container {
-      max-width: 1100px;
+      max-width: 1200px;
       margin: 0 auto;
       padding: 28px 24px;
     }
 
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+
     /* Stat cards */
     .stats {
       display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 14px;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 12px;
       margin-bottom: 24px;
     }
 
@@ -57,34 +84,43 @@
       background: #1a1a24;
       border: 1px solid #2a2a3a;
       border-radius: 12px;
-      padding: 18px 20px;
+      padding: 16px 18px;
     }
 
     .stat .label {
-      font-size: 0.75rem;
-      color: #777;
+      font-size: 0.72rem;
+      color: #666;
       text-transform: uppercase;
       letter-spacing: 0.8px;
       margin-bottom: 8px;
     }
 
     .stat .value {
-      font-size: 1.9rem;
+      font-size: 1.7rem;
       font-weight: 700;
       color: #fff;
       line-height: 1;
     }
 
-    .stat.opened .value { color: #22c55e; }
-    .stat.sent .value   { color: #f59e0b; }
-    .stat.proxy .value  { color: #ef4444; }
+    .stat .sub {
+      font-size: 0.75rem;
+      color: #555;
+      margin-top: 4px;
+    }
 
-    /* Table card */
+    .stat.green .value { color: #22c55e; }
+    .stat.yellow .value { color: #f59e0b; }
+    .stat.red .value { color: #ef4444; }
+    .stat.blue .value { color: #7c6af7; }
+    .stat.cyan .value { color: #06b6d4; }
+
+    /* Cards */
     .card {
       background: #1a1a24;
       border: 1px solid #2a2a3a;
       border-radius: 12px;
       padding: 20px 24px;
+      margin-bottom: 20px;
     }
 
     .card-header {
@@ -95,13 +131,62 @@
     }
 
     .card-header h2 {
-      font-size: 0.85rem;
+      font-size: 0.82rem;
       font-weight: 600;
-      color: #888;
+      color: #777;
       text-transform: uppercase;
       letter-spacing: 1px;
     }
 
+    /* Variant comparison */
+    .variant-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 12px;
+    }
+
+    .variant-card {
+      background: #0f0f13;
+      border: 1px solid #2a2a3a;
+      border-radius: 10px;
+      padding: 16px;
+    }
+
+    .variant-card .vname {
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: #7c6af7;
+      margin-bottom: 12px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .variant-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+      font-size: 0.82rem;
+    }
+
+    .variant-row .vlabel { color: #666; }
+    .variant-row .vval { font-weight: 600; color: #e2e2e2; }
+
+    .progress-bar {
+      height: 4px;
+      background: #2a2a3a;
+      border-radius: 4px;
+      margin-top: 2px;
+      margin-bottom: 10px;
+      overflow: hidden;
+    }
+
+    .progress-fill { height: 100%; border-radius: 4px; transition: width 0.4s; }
+    .fill-green { background: #22c55e; }
+    .fill-blue  { background: #7c6af7; }
+    .fill-red   { background: #ef4444; }
+
+    /* Day table */
     .table-wrap {
       overflow-x: auto;
       border-radius: 8px;
@@ -111,7 +196,7 @@
     table {
       width: 100%;
       border-collapse: collapse;
-      font-size: 0.84rem;
+      font-size: 0.83rem;
     }
 
     thead tr { background: #1f1f2e; }
@@ -119,9 +204,9 @@
     th {
       text-align: left;
       padding: 11px 14px;
-      color: #777;
+      color: #666;
       font-weight: 600;
-      font-size: 0.75rem;
+      font-size: 0.73rem;
       text-transform: uppercase;
       letter-spacing: 0.5px;
       border-bottom: 1px solid #2a2a3a;
@@ -129,7 +214,7 @@
     }
 
     td {
-      padding: 11px 14px;
+      padding: 10px 14px;
       border-bottom: 1px solid #1e1e2a;
       color: #ccc;
       vertical-align: middle;
@@ -138,92 +223,149 @@
     tbody tr:last-child td { border-bottom: none; }
     tbody tr:hover { background: #1e1e2c; }
 
-    .status-badge {
+    .badge {
       display: inline-block;
       border-radius: 20px;
-      padding: 3px 10px;
-      font-size: 0.73rem;
+      padding: 2px 9px;
+      font-size: 0.72rem;
       font-weight: 700;
-      letter-spacing: 0.5px;
     }
 
-    .status-opened { background: #22c55e22; color: #22c55e; border: 1px solid #22c55e44; }
-    .status-sent   { background: #f59e0b22; color: #f59e0b; border: 1px solid #f59e0b44; }
+    .badge-green  { background: #22c55e22; color: #22c55e; border: 1px solid #22c55e44; }
+    .badge-yellow { background: #f59e0b22; color: #f59e0b; border: 1px solid #f59e0b44; }
+    .badge-red    { background: #ef444422; color: #ef4444; border: 1px solid #ef444444; }
+    .badge-purple { background: #7c6af722; color: #7c6af7; border: 1px solid #7c6af744; }
 
-    .proxy-badge {
-      display: inline-block;
-      background: #ef444422;
-      color: #ef4444;
-      border: 1px solid #ef444444;
-      border-radius: 20px;
-      padding: 2px 8px;
-      font-size: 0.7rem;
-      font-weight: 600;
-    }
+    .ts { color: #555; font-size: 0.77rem; }
+    .empty-state { text-align: center; padding: 40px 0; color: #444; font-size: 0.88rem; }
 
-    .ts { color: #666; font-size: 0.78rem; }
-    .email-cell { color: #e2e2e2; }
-    .count-cell { color: #7c6af7; font-weight: 600; }
-
-    .empty-state {
-      text-align: center;
-      padding: 48px 0;
-      color: #555;
-      font-size: 0.9rem;
-    }
+    /* Rate cell */
+    .rate { font-weight: 600; }
+    .rate.good { color: #22c55e; }
+    .rate.mid  { color: #f59e0b; }
+    .rate.low  { color: #ef4444; }
   </style>
 </head>
 <body>
 
 <header>
   <h1>ikshan <span>tracker</span></h1>
-  <button class="refresh-btn" onclick="loadData()">↻ Refresh</button>
+  <div class="header-right">
+    <button class="refresh-btn" onclick="loadAll()">↻ Refresh</button>
+  </div>
 </header>
+
+<div class="tabs">
+  <div class="tab active" onclick="switchTab('overview')">Overview</div>
+  <div class="tab" onclick="switchTab('variants')">A/B Variants</div>
+  <div class="tab" onclick="switchTab('days')">Day Wise</div>
+  <div class="tab" onclick="switchTab('emails')">All Emails</div>
+  <div class="tab" onclick="switchTab('links')">Link Clicks</div>
+</div>
 
 <div class="container">
 
-  <!-- Summary stats -->
-  <div class="stats">
-    <div class="stat">
-      <div class="label">Total Emails</div>
-      <div class="value" id="statTotal">—</div>
+  <!-- OVERVIEW -->
+  <div class="tab-content active" id="tab-overview">
+    <div class="stats">
+      <div class="stat">
+        <div class="label">Total Sent</div>
+        <div class="value" id="oTotal">—</div>
+      </div>
+      <div class="stat green">
+        <div class="label">Open Rate</div>
+        <div class="value" id="oOpenRate">—</div>
+        <div class="sub" id="oOpenCount"></div>
+      </div>
+      <div class="stat blue">
+        <div class="label">Click Rate</div>
+        <div class="value" id="oClickRate">—</div>
+        <div class="sub" id="oClickCount"></div>
+      </div>
+      <div class="stat yellow">
+        <div class="label">Bounce Rate</div>
+        <div class="value" id="oBounceRate">—</div>
+        <div class="sub" id="oBounceCount"></div>
+      </div>
+      <div class="stat red">
+        <div class="label">Proxy</div>
+        <div class="value" id="oProxy">—</div>
+      </div>
     </div>
-    <div class="stat opened">
-      <div class="label">Opened</div>
-      <div class="value" id="statOpened">—</div>
-    </div>
-    <div class="stat sent">
-      <div class="label">Not Opened</div>
-      <div class="value" id="statSent">—</div>
-    </div>
-    <div class="stat proxy">
-      <div class="label">Proxy Detected</div>
-      <div class="value" id="statProxy">—</div>
+
+    <div class="card">
+      <div class="card-header"><h2>Recent Activity</h2></div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Email</th><th>Company</th><th>Variant</th><th>Day</th><th>Status</th><th>Clicked</th><th>Sent At</th></tr>
+          </thead>
+          <tbody id="recentBody">
+            <tr><td colspan="7"><div class="empty-state">Loading…</div></td></tr>
+          </tbody>
+        </table>
+      </div>
     </div>
   </div>
 
-  <!-- Table -->
-  <div class="card">
-    <div class="card-header">
-      <h2>All Emails</h2>
+  <!-- A/B VARIANTS -->
+  <div class="tab-content" id="tab-variants">
+    <div class="card">
+      <div class="card-header"><h2>Variant Performance</h2></div>
+      <div class="variant-grid" id="variantGrid">
+        <div class="empty-state">Loading…</div>
+      </div>
     </div>
-    <div class="table-wrap">
-      <table>
-        <thead>
-          <tr>
-            <th>Email</th>
-            <th>Status</th>
-            <th>Opens</th>
-            <th>Sent At</th>
-            <th>Opened At</th>
-            <th>IP</th>
-            <th>Proxy</th>
-          </tr>
-        </thead>
-        <tbody id="tableBody">
-          <tr><td colspan="7"><div class="empty-state">Loading…</div></td></tr>
-        </tbody>
-      </table>
+  </div>
+
+  <!-- DAY WISE -->
+  <div class="tab-content" id="tab-days">
+    <div class="card">
+      <div class="card-header"><h2>Day Wise Breakdown</h2></div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Day</th><th>Sent</th><th>Opened</th><th>Open Rate</th><th>Clicked</th><th>Click Rate</th><th>Bounce Rate</th></tr>
+          </thead>
+          <tbody id="daysBody">
+            <tr><td colspan="7"><div class="empty-state">Loading…</div></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ALL EMAILS -->
+  <div class="tab-content" id="tab-emails">
+    <div class="card">
+      <div class="card-header"><h2>All Emails</h2></div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Email</th><th>Company</th><th>Variant</th><th>Day</th><th>Status</th><th>Opens</th><th>Sent At</th><th>Opened At</th><th>IP</th><th>Proxy</th></tr>
+          </thead>
+          <tbody id="emailsBody">
+            <tr><td colspan="10"><div class="empty-state">Loading…</div></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- LINK CLICKS -->
+  <div class="tab-content" id="tab-links">
+    <div class="card">
+      <div class="card-header"><h2>Link Click Tracking</h2></div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Email</th><th>Company</th><th>Variant</th><th>Day</th><th>Clicked</th><th>Clicked At</th><th>IP</th><th>Target URL</th></tr>
+          </thead>
+          <tbody id="linksBody">
+            <tr><td colspan="8"><div class="empty-state">Loading…</div></td></tr>
+          </tbody>
+        </table>
+      </div>
     </div>
   </div>
 
@@ -231,6 +373,31 @@
 
 <script>
   const BASE = 'https://email-tracker-azure-seven.vercel.app';
+
+  let emailData = [];
+  let linkData  = [];
+
+  function switchTab(name) {
+    document.querySelectorAll('.tab').forEach((t, i) => {
+      const names = ['overview','variants','days','emails','links'];
+      t.classList.toggle('active', names[i] === name);
+    });
+    document.querySelectorAll('.tab-content').forEach(c => {
+      c.classList.toggle('active', c.id === 'tab-' + name);
+    });
+  }
+
+  function pct(n, d) {
+    if (!d) return '0%';
+    return Math.round((n / d) * 100) + '%';
+  }
+
+  function rateClass(pctStr) {
+    const n = parseInt(pctStr);
+    if (n >= 40) return 'good';
+    if (n >= 20) return 'mid';
+    return 'low';
+  }
 
   function fmtDate(ts) {
     if (!ts) return '—';
@@ -241,51 +408,140 @@
     return String(str ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
   }
 
-  async function loadData() {
-    const tbody = document.getElementById('tableBody');
-    tbody.innerHTML = '<tr><td colspan="7"><div class="empty-state">Loading…</div></td></tr>';
+  function render() {
+    const emails = emailData;
+    const links  = linkData;
 
+    const total    = emails.length;
+    const opened   = emails.filter(r => r.status === 'OPENED').length;
+    const bounced  = total - opened;
+    const clicked  = links.filter(r => r.clicked).length;
+    const proxies  = emails.filter(r => r.is_proxy).length;
+
+    // Overview stats
+    document.getElementById('oTotal').textContent      = total;
+    document.getElementById('oOpenRate').textContent   = pct(opened, total);
+    document.getElementById('oOpenCount').textContent  = `${opened} of ${total}`;
+    document.getElementById('oClickRate').textContent  = pct(clicked, total);
+    document.getElementById('oClickCount').textContent = `${clicked} of ${total}`;
+    document.getElementById('oBounceRate').textContent = pct(bounced, total);
+    document.getElementById('oBounceCount').textContent= `${bounced} of ${total}`;
+    document.getElementById('oProxy').textContent      = proxies;
+
+    // Recent activity (last 10, newest first)
+    const recent = [...emails].sort((a,b) => new Date(b.sent_at) - new Date(a.sent_at)).slice(0, 10);
+    const recentClicked = new Set(links.filter(l => l.clicked).map(l => l.email + l.variant + l.day));
+
+    document.getElementById('recentBody').innerHTML = recent.length ? recent.map(r => {
+      const wasClicked = recentClicked.has(r.email + r.variant + r.day);
+      return `<tr>
+        <td>${esc(r.email)}</td>
+        <td>${esc(r.company || '—')}</td>
+        <td><span class="badge badge-purple">${esc(r.variant || '—')}</span></td>
+        <td>Day ${r.day ?? '—'}</td>
+        <td><span class="badge ${r.status === 'OPENED' ? 'badge-green' : 'badge-yellow'}">${r.status}</span></td>
+        <td>${wasClicked ? '<span class="badge badge-green">YES</span>' : '<span style="color:#444">—</span>'}</td>
+        <td class="ts">${fmtDate(r.sent_at)}</td>
+      </tr>`;
+    }).join('') : '<tr><td colspan="7"><div class="empty-state">No data yet.</div></td></tr>';
+
+    // --- Variants ---
+    const variants = [...new Set(emails.map(r => r.variant).filter(Boolean))].sort();
+    const variantGrid = document.getElementById('variantGrid');
+
+    if (!variants.length) {
+      variantGrid.innerHTML = '<div class="empty-state">No data yet.</div>';
+    } else {
+      variantGrid.innerHTML = variants.map(v => {
+        const ve = emails.filter(r => r.variant === v);
+        const vl = links.filter(r => r.variant === v);
+        const vs = ve.length;
+        const vo = ve.filter(r => r.status === 'OPENED').length;
+        const vc = vl.filter(r => r.clicked).length;
+        const vb = vs - vo;
+        const op = pct(vo, vs), cp = pct(vc, vs), bp = pct(vb, vs);
+        return `<div class="variant-card">
+          <div class="vname">Variant ${esc(v)}</div>
+          <div class="variant-row"><span class="vlabel">Sent</span><span class="vval">${vs}</span></div>
+          <div class="variant-row"><span class="vlabel">Open Rate</span><span class="vval" style="color:#22c55e">${op}</span></div>
+          <div class="progress-bar"><div class="progress-fill fill-green" style="width:${op}"></div></div>
+          <div class="variant-row"><span class="vlabel">Click Rate</span><span class="vval" style="color:#7c6af7">${cp}</span></div>
+          <div class="progress-bar"><div class="progress-fill fill-blue" style="width:${cp}"></div></div>
+          <div class="variant-row"><span class="vlabel">Bounce Rate</span><span class="vval" style="color:#ef4444">${bp}</span></div>
+          <div class="progress-bar"><div class="progress-fill fill-red" style="width:${bp}"></div></div>
+        </div>`;
+      }).join('');
+    }
+
+    // --- Day wise ---
+    const days = [...new Set(emails.map(r => r.day).filter(d => d != null))].sort((a,b) => a-b);
+    document.getElementById('daysBody').innerHTML = days.length ? days.map(d => {
+      const de = emails.filter(r => r.day === d);
+      const dl = links.filter(r => r.day === d);
+      const ds = de.length;
+      const dop = de.filter(r => r.status === 'OPENED').length;
+      const dc = dl.filter(r => r.clicked).length;
+      const db = ds - dop;
+      const oRate = pct(dop, ds), cRate = pct(dc, ds), bRate = pct(db, ds);
+      return `<tr>
+        <td><span class="badge badge-purple">Day ${d}</span></td>
+        <td>${ds}</td>
+        <td>${dop}</td>
+        <td><span class="rate ${rateClass(oRate)}">${oRate}</span></td>
+        <td>${dc}</td>
+        <td><span class="rate ${rateClass(cRate)}">${cRate}</span></td>
+        <td><span class="rate ${rateClass(bRate)}">${bRate}</span></td>
+      </tr>`;
+    }).join('') : '<tr><td colspan="7"><div class="empty-state">No data yet.</div></td></tr>';
+
+    // --- All emails ---
+    const sorted = [...emails].sort((a,b) => new Date(b.sent_at) - new Date(a.sent_at));
+    document.getElementById('emailsBody').innerHTML = sorted.length ? sorted.map(r => `
+      <tr>
+        <td>${esc(r.email)}</td>
+        <td>${esc(r.company || '—')}</td>
+        <td><span class="badge badge-purple">${esc(r.variant || '—')}</span></td>
+        <td>Day ${r.day ?? '—'}</td>
+        <td><span class="badge ${r.status === 'OPENED' ? 'badge-green' : 'badge-yellow'}">${r.status}</span></td>
+        <td style="color:#7c6af7;font-weight:600">${r.open_count ?? 0}</td>
+        <td class="ts">${fmtDate(r.sent_at)}</td>
+        <td class="ts">${fmtDate(r.opened_at)}</td>
+        <td class="ts">${esc(r.ip || '—')}</td>
+        <td>${r.is_proxy ? '<span class="badge badge-red">PROXY</span>' : '<span style="color:#444">—</span>'}</td>
+      </tr>
+    `).join('') : '<tr><td colspan="10"><div class="empty-state">No data yet.</div></td></tr>';
+
+    // --- Link clicks ---
+    const sortedLinks = [...links].sort((a,b) => new Date(b.created_at) - new Date(a.created_at));
+    document.getElementById('linksBody').innerHTML = sortedLinks.length ? sortedLinks.map(r => `
+      <tr>
+        <td>${esc(r.email)}</td>
+        <td>${esc(r.company || '—')}</td>
+        <td><span class="badge badge-purple">${esc(r.variant || '—')}</span></td>
+        <td>Day ${r.day ?? '—'}</td>
+        <td>${r.clicked ? '<span class="badge badge-green">YES</span>' : '<span class="badge badge-yellow">NO</span>'}</td>
+        <td class="ts">${fmtDate(r.clicked_at)}</td>
+        <td class="ts">${esc(r.ip || '—')}</td>
+        <td class="ts" style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(r.target_url || '—')}</td>
+      </tr>
+    `).join('') : '<tr><td colspan="8"><div class="empty-state">No data yet.</div></td></tr>';
+  }
+
+  async function loadAll() {
     try {
-      const res = await fetch(BASE + '/get-data');
-      const json = await res.json();
-      const rows = json.data || [];
-
-      // Stats
-      const opened = rows.filter(r => r.status === 'OPENED').length;
-      const proxies = rows.filter(r => r.is_proxy).length;
-      document.getElementById('statTotal').textContent  = rows.length;
-      document.getElementById('statOpened').textContent = opened;
-      document.getElementById('statSent').textContent   = rows.length - opened;
-      document.getElementById('statProxy').textContent  = proxies;
-
-      if (!rows.length) {
-        tbody.innerHTML = '<tr><td colspan="7"><div class="empty-state">No emails tracked yet.</div></td></tr>';
-        return;
-      }
-
-      // Sort: opened first, then by sent_at desc
-      rows.sort((a, b) => {
-        if (a.status === b.status) return new Date(b.sent_at) - new Date(a.sent_at);
-        return a.status === 'OPENED' ? -1 : 1;
-      });
-
-      tbody.innerHTML = rows.map(r => `
-        <tr>
-          <td class="email-cell">${esc(r.email)}</td>
-          <td><span class="status-badge ${r.status === 'OPENED' ? 'status-opened' : 'status-sent'}">${r.status}</span></td>
-          <td class="count-cell">${r.open_count ?? 0}</td>
-          <td class="ts">${fmtDate(r.sent_at)}</td>
-          <td class="ts">${fmtDate(r.opened_at)}</td>
-          <td class="ts">${esc(r.ip || '—')}</td>
-          <td>${r.is_proxy ? '<span class="proxy-badge">PROXY</span>' : '<span style="color:#444">—</span>'}</td>
-        </tr>
-      `).join('');
-    } catch (e) {
-      tbody.innerHTML = `<tr><td colspan="7"><div class="empty-state">Error: ${esc(e.message)}</div></td></tr>`;
+      const [e, l] = await Promise.all([
+        fetch(BASE + '/get-data').then(r => r.json()),
+        fetch(BASE + '/get-links').then(r => r.json()),
+      ]);
+      emailData = e.data || [];
+      linkData  = l.data || [];
+      render();
+    } catch (err) {
+      console.error(err);
     }
   }
 
-  loadData();
+  loadAll();
 </script>
 </body>
 </html>
