@@ -1,7 +1,9 @@
 from fastapi import FastAPI, Response, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import RedirectResponse
 from pydantic import BaseModel
-from database import get_connection, init_db, insert_email, mark_as_opened
+from typing import Optional
+from database import get_connection, init_db, insert_email, mark_as_opened, insert_link, mark_link_clicked
 from utils import generate_uuid
 from email_verifier import verify_email
 
@@ -17,6 +19,9 @@ app.add_middleware(
 
 class CreateEmailRequest(BaseModel):
     email: str
+    company: str
+    variant: str
+    day: int
 
 
 @app.on_event("startup")
@@ -33,7 +38,7 @@ def home():
 @app.post("/create-email")
 def create_email(payload: CreateEmailRequest):
     uid = generate_uuid()
-    insert_email(uid, payload.email)
+    insert_email(uid, payload.email, payload.company, payload.variant, payload.day)
 
     return {
         "uid": uid,
@@ -67,6 +72,60 @@ def track(uid: str, request: Request):
     return Response(content=pixel, media_type="image/png")
 
 
+# 🔹 Create link
+class CreateLinkRequest(BaseModel):
+    email: str
+    company: str
+    variant: str
+    day: int
+    target_url: str
+
+@app.post("/create-link")
+def create_link(payload: CreateLinkRequest):
+    uid = generate_uuid()
+    insert_link(uid, payload.email, payload.company, payload.variant, payload.day, payload.target_url)
+    return {"uid": uid, "tracking_url": f"/r/{uid}"}
+
+
+# 🔹 Redirect + track click
+@app.get("/r/{uid}")
+def track_link(uid: str, request: Request):
+    ip = request.client.host if request.client else "unknown"
+    user_agent = request.headers.get("user-agent")
+    target_url = mark_link_clicked(uid, ip, user_agent)
+    if not target_url:
+        return {"error": "Invalid link"}
+    return RedirectResponse(url=target_url)
+
+
+# 🔹 Get link tracking data
+@app.get("/get-links")
+def get_links():
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM link_tracking ORDER BY created_at DESC")
+    rows = cursor.fetchall()
+    conn.close()
+
+    data = []
+    for row in rows:
+        data.append({
+            "uid": row[0],
+            "email": row[1],
+            "company": row[2],
+            "variant": row[3],
+            "day": row[4],
+            "target_url": row[5],
+            "created_at": row[6],
+            "clicked": row[7],
+            "clicked_at": row[8],
+            "ip": row[9],
+            "user_agent": row[10],
+        })
+
+    return {"data": data}
+
+
 # 🔹 Verify email
 @app.get("/verify-email")
 def verify_email_endpoint(email: str):
@@ -91,13 +150,16 @@ def get_data():
         data.append({
             "uid": row[0],
             "email": row[1],
-            "status": row[2],
-            "sent_at": row[3],
-            "opened_at": row[4],
-            "open_count": row[5],
-            "ip": row[6],
-            "user_agent": row[7],
-            "is_proxy": row[8]
+            "company": row[2],
+            "variant": row[3],
+            "day": row[4],
+            "status": row[5],
+            "sent_at": row[6],
+            "opened_at": row[7],
+            "open_count": row[8],
+            "ip": row[9],
+            "user_agent": row[10],
+            "is_proxy": row[11]
         })
 
     return {"data": data}

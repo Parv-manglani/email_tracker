@@ -24,6 +24,9 @@ def init_db():
     CREATE TABLE IF NOT EXISTS email_tracking (
         id TEXT PRIMARY KEY,
         email TEXT,
+        company TEXT,
+        variant TEXT,
+        day INTEGER,
         status TEXT,
         sent_at TIMESTAMP,
         opened_at TIMESTAMP,
@@ -34,22 +37,73 @@ def init_db():
     )
     """)
 
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS link_tracking (
+        id TEXT PRIMARY KEY,
+        email TEXT,
+        company TEXT,
+        variant TEXT,
+        day INTEGER,
+        target_url TEXT,
+        created_at TIMESTAMP,
+        clicked BOOLEAN DEFAULT FALSE,
+        clicked_at TIMESTAMP,
+        ip TEXT,
+        user_agent TEXT
+    )
+    """)
+
     conn.commit()
     conn.close()
 
 
 # 🔹 Insert email record
-def insert_email(uid, email):
+def insert_email(uid, email, company, variant, day):
     conn = get_connection()
     cursor = conn.cursor()
 
     cursor.execute("""
-        INSERT INTO email_tracking (id, email, status, sent_at)
-        VALUES (%s, %s, %s, %s)
-    """, (uid, email, "SENT", datetime.now()))
+        INSERT INTO email_tracking (id, email, company, variant, day, status, sent_at)
+        VALUES (%s, %s, %s, %s, %s, %s, %s)
+    """, (uid, email, company, variant, day, "SENT", datetime.now()))
 
     conn.commit()
     conn.close()
+
+
+def insert_link(uid, email, company, variant, day, target_url):
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        INSERT INTO link_tracking (id, email, company, variant, day, target_url, created_at)
+        VALUES (%s, %s, %s, %s, %s, %s, %s)
+    """, (uid, email, company, variant, day, target_url, datetime.now()))
+
+    conn.commit()
+    conn.close()
+
+
+def mark_link_clicked(uid, ip, user_agent):
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        UPDATE link_tracking
+        SET clicked = TRUE,
+            clicked_at = %s,
+            ip = %s,
+            user_agent = %s
+        WHERE id = %s
+    """, (datetime.now(), ip, user_agent, uid))
+
+    conn.commit()
+
+    cursor.execute("SELECT target_url FROM link_tracking WHERE id = %s", (uid,))
+    result = cursor.fetchone()
+    conn.close()
+
+    return result[0] if result else None
 
 
 # 🔥 CORE FUNCTION (SMART TRACKING)
