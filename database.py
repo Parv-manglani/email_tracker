@@ -98,7 +98,7 @@ def mark_link_clicked(uid, ip, user_agent):
     target_url, created_at = result
     time_diff = (datetime.now() - created_at).total_seconds()
 
-    if time_diff > 3:
+    if time_diff > 5:
         cursor.execute("""
             UPDATE link_tracking
             SET clicked = TRUE,
