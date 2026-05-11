@@ -430,10 +430,10 @@
 
     // Recent activity (last 10, newest first)
     const recent = [...emails].sort((a,b) => new Date(b.sent_at) - new Date(a.sent_at)).slice(0, 10);
-    const recentClicked = new Set(links.filter(l => l.clicked).map(l => l.email + l.variant + l.day));
+    const recentClicked = new Set(links.filter(l => l.clicked).map(l => `${l.email}|${l.variant}|${l.day}`));
 
     document.getElementById('recentBody').innerHTML = recent.length ? recent.map(r => {
-      const wasClicked = recentClicked.has(r.email + r.variant + r.day);
+      const wasClicked = recentClicked.has(`${r.email}|${r.variant}|${r.day}`);
       return `<tr>
         <td>${esc(r.email)}</td>
         <td>${esc(r.company || '—')}</td>
