@@ -282,11 +282,6 @@
         <div class="value" id="oClickRate">—</div>
         <div class="sub" id="oClickCount"></div>
       </div>
-      <div class="stat yellow">
-        <div class="label">Bounce Rate</div>
-        <div class="value" id="oBounceRate">—</div>
-        <div class="sub" id="oBounceCount"></div>
-      </div>
       <div class="stat red">
         <div class="label">Proxy</div>
         <div class="value" id="oProxy">—</div>
@@ -325,7 +320,7 @@
       <div class="table-wrap">
         <table>
           <thead>
-            <tr><th>Day</th><th>Sent</th><th>Opened</th><th>Open Rate</th><th>Clicked</th><th>Click Rate</th><th>Bounce Rate</th></tr>
+            <tr><th>Day</th><th>Sent</th><th>Opened</th><th>Open Rate</th><th>Clicked</th><th>Click Rate</th></tr>
           </thead>
           <tbody id="daysBody">
             <tr><td colspan="7"><div class="empty-state">Loading…</div></td></tr>
@@ -414,7 +409,6 @@
 
     const total    = emails.length;
     const opened   = emails.filter(r => r.status === 'OPENED').length;
-    const bounced  = total - opened;
     const clicked  = links.filter(r => r.clicked).length;
     const proxies  = emails.filter(r => r.is_proxy).length;
 
@@ -424,8 +418,6 @@
     document.getElementById('oOpenCount').textContent  = `${opened} of ${total}`;
     document.getElementById('oClickRate').textContent  = pct(clicked, total);
     document.getElementById('oClickCount').textContent = `${clicked} of ${total}`;
-    document.getElementById('oBounceRate').textContent = pct(bounced, total);
-    document.getElementById('oBounceCount').textContent= `${bounced} of ${total}`;
     document.getElementById('oProxy').textContent      = proxies;
 
     // Recent activity (last 10, newest first)
@@ -458,8 +450,7 @@
         const vs = ve.length;
         const vo = ve.filter(r => r.status === 'OPENED').length;
         const vc = vl.filter(r => r.clicked).length;
-        const vb = vs - vo;
-        const op = pct(vo, vs), cp = pct(vc, vs), bp = pct(vb, vs);
+        const op = pct(vo, vs), cp = pct(vc, vs);
         return `<div class="variant-card">
           <div class="vname">Variant ${esc(v)}</div>
           <div class="variant-row"><span class="vlabel">Sent</span><span class="vval">${vs}</span></div>
@@ -467,8 +458,6 @@
           <div class="progress-bar"><div class="progress-fill fill-green" style="width:${op}"></div></div>
           <div class="variant-row"><span class="vlabel">Click Rate</span><span class="vval" style="color:#7c6af7">${cp}</span></div>
           <div class="progress-bar"><div class="progress-fill fill-blue" style="width:${cp}"></div></div>
-          <div class="variant-row"><span class="vlabel">Bounce Rate</span><span class="vval" style="color:#ef4444">${bp}</span></div>
-          <div class="progress-bar"><div class="progress-fill fill-red" style="width:${bp}"></div></div>
         </div>`;
       }).join('');
     }
@@ -481,8 +470,7 @@
       const ds = de.length;
       const dop = de.filter(r => r.status === 'OPENED').length;
       const dc = dl.filter(r => r.clicked).length;
-      const db = ds - dop;
-      const oRate = pct(dop, ds), cRate = pct(dc, ds), bRate = pct(db, ds);
+      const oRate = pct(dop, ds), cRate = pct(dc, ds);
       return `<tr>
         <td><span class="badge badge-purple">Day ${d}</span></td>
         <td>${ds}</td>
@@ -490,7 +478,6 @@
         <td><span class="rate ${rateClass(oRate)}">${oRate}</span></td>
         <td>${dc}</td>
         <td><span class="rate ${rateClass(cRate)}">${cRate}</span></td>
-        <td><span class="rate ${rateClass(bRate)}">${bRate}</span></td>
       </tr>`;
     }).join('') : '<tr><td colspan="7"><div class="empty-state">No data yet.</div></td></tr>';
 
