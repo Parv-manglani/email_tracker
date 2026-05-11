@@ -88,22 +88,29 @@ def mark_link_clicked(uid, ip, user_agent):
     conn = get_connection()
     cursor = conn.cursor()
 
-    cursor.execute("""
-        UPDATE link_tracking
-        SET clicked = TRUE,
-            clicked_at = %s,
-            ip = %s,
-            user_agent = %s
-        WHERE id = %s
-    """, (datetime.now(), ip, user_agent, uid))
-
-    conn.commit()
-
-    cursor.execute("SELECT target_url FROM link_tracking WHERE id = %s", (uid,))
+    cursor.execute("SELECT target_url, created_at FROM link_tracking WHERE id = %s", (uid,))
     result = cursor.fetchone()
-    conn.close()
 
-    return result[0] if result else None
+    if not result:
+        conn.close()
+        return None
+
+    target_url, created_at = result
+    time_diff = (datetime.now() - created_at).total_seconds()
+
+    if time_diff > 3:
+        cursor.execute("""
+            UPDATE link_tracking
+            SET clicked = TRUE,
+                clicked_at = %s,
+                ip = %s,
+                user_agent = %s
+            WHERE id = %s
+        """, (datetime.now(), ip, user_agent, uid))
+        conn.commit()
+
+    conn.close()
+    return target_url
 
 
 # 🔥 CORE FUNCTION (SMART TRACKING)
@@ -123,42 +130,17 @@ def mark_as_opened(uid, ip, user_agent):
         conn.close()
         return
 
-    sent_at = result[0]
     current_time = datetime.now()
 
-    # 🔹 Step 2: time diff calculate
-    time_diff = (current_time - sent_at).total_seconds()
-
-    # 🔥 ONLY TIME-BASED FILTER
-    is_proxy = time_diff < 3   # < 3 sec = proxy
-
-    print(f"UID: {uid}")
-    print(f"Time diff: {time_diff}")
-    print(f"IP: {ip}")
-    print(f"UA: {user_agent}")
-    print(f"Proxy (time-based): {is_proxy}")
-
-    # 🔹 Step 3: update DB
-    if is_proxy:
-        cursor.execute("""
-            UPDATE email_tracking
-            SET ip = %s,
-                user_agent = %s,
-                is_proxy = TRUE
-            WHERE id = %s
-        """, (ip, user_agent, uid))
-
-    else:
-        cursor.execute("""
-            UPDATE email_tracking
-            SET status = 'OPENED',
-                opened_at = %s,
-                open_count = open_count + 1,
-                ip = %s,
-                user_agent = %s,
-                is_proxy = FALSE
-            WHERE id = %s
-        """, (current_time, ip, user_agent, uid))
+    cursor.execute("""
+        UPDATE email_tracking
+        SET status = 'OPENED',
+            opened_at = %s,
+            open_count = open_count + 1,
+            ip = %s,
+            user_agent = %s
+        WHERE id = %s
+    """, (current_time, ip, user_agent, uid))
 
     conn.commit()
     conn.close()
