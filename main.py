@@ -1,6 +1,5 @@
 from fastapi import FastAPI, Response, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import RedirectResponse
 from pydantic import BaseModel
 from typing import Optional
 from database import get_connection, init_db, insert_email, mark_as_opened, insert_link, mark_link_clicked
@@ -87,15 +86,44 @@ def create_link(payload: CreateLinkRequest):
     return {"uid": uid, "tracking_url": f"/r/{uid}"}
 
 
-# 🔹 Redirect + track click
+# 🔹 JS redirect page (scanners won't execute JS)
 @app.get("/r/{uid}")
-def track_link(uid: str, request: Request):
+def track_link(uid: str):
+    html = f"""<!DOCTYPE html>
+<html>
+<head><title>Redirecting...</title></head>
+<body>
+<script>
+  fetch('/confirm/{uid}', {{method: 'POST'}}).finally(function() {{
+    window.location.href = document.querySelector('meta[name=url]').content;
+  }});
+</script>
+<meta name="url" content="">
+<noscript><meta http-equiv="refresh" content="0;url=/confirm-redirect/{uid}"></noscript>
+</body>
+</html>"""
+
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT target_url FROM link_tracking WHERE id = %s", (uid,))
+    result = cursor.fetchone()
+    conn.close()
+
+    if not result:
+        return {"error": "Invalid link"}
+
+    target_url = result[0]
+    html = html.replace('content=""', f'content="{target_url}"')
+    return Response(content=html, media_type="text/html")
+
+
+# 🔹 Confirm click (called by JS)
+@app.post("/confirm/{uid}")
+def confirm_click(uid: str, request: Request):
     ip = request.client.host if request.client else "unknown"
     user_agent = request.headers.get("user-agent")
-    target_url = mark_link_clicked(uid, ip, user_agent)
-    if not target_url:
-        return {"error": "Invalid link"}
-    return RedirectResponse(url=target_url)
+    mark_link_clicked(uid, ip, user_agent)
+    return {"ok": True}
 
 
 # 🔹 Get link tracking data

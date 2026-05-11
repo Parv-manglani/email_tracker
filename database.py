@@ -95,19 +95,17 @@ def mark_link_clicked(uid, ip, user_agent):
         conn.close()
         return None
 
-    target_url, created_at = result
-    time_diff = (datetime.now() - created_at).total_seconds()
+    target_url = result[0]
 
-    if time_diff > 5:
-        cursor.execute("""
-            UPDATE link_tracking
-            SET clicked = TRUE,
-                clicked_at = %s,
-                ip = %s,
-                user_agent = %s
-            WHERE id = %s
-        """, (datetime.now(), ip, user_agent, uid))
-        conn.commit()
+    cursor.execute("""
+        UPDATE link_tracking
+        SET clicked = TRUE,
+            clicked_at = %s,
+            ip = %s,
+            user_agent = %s
+        WHERE id = %s
+    """, (datetime.now(), ip, user_agent, uid))
+    conn.commit()
 
     conn.close()
     return target_url
