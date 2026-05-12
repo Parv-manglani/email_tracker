@@ -320,7 +320,7 @@
       <div class="table-wrap">
         <table>
           <thead>
-            <tr><th>Day</th><th>Sent</th><th>Opened</th><th>Open Rate</th><th>Clicked</th><th>Click Rate</th></tr>
+            <tr><th>Day</th><th>Variant</th><th>Sent</th><th>Opened</th><th>Open Rate</th><th>Clicked</th><th>Click Rate</th></tr>
           </thead>
           <tbody id="daysBody">
             <tr><td colspan="7"><div class="empty-state">Loading…</div></td></tr>
@@ -438,13 +438,13 @@
     }).join('') : '<tr><td colspan="7"><div class="empty-state">No data yet.</div></td></tr>';
 
     // --- Variants ---
-    const variants = [...new Set(emails.map(r => r.variant).filter(Boolean))].sort();
+    const allVariants = [...new Set(emails.map(r => r.variant).filter(Boolean))].sort();
     const variantGrid = document.getElementById('variantGrid');
 
-    if (!variants.length) {
+    if (!allVariants.length) {
       variantGrid.innerHTML = '<div class="empty-state">No data yet.</div>';
     } else {
-      variantGrid.innerHTML = variants.map(v => {
+      variantGrid.innerHTML = allVariants.map(v => {
         const ve = emails.filter(r => r.variant === v);
         const vl = links.filter(r => r.variant === v);
         const vs = ve.length;
@@ -462,24 +462,35 @@
       }).join('');
     }
 
-    // --- Day wise ---
-    const days = [...new Set(emails.map(r => r.day).filter(d => d != null))].sort((a,b) => a-b);
-    document.getElementById('daysBody').innerHTML = days.length ? days.map(d => {
-      const de = emails.filter(r => r.day === d);
-      const dl = links.filter(r => r.day === d);
-      const ds = de.length;
-      const dop = de.filter(r => r.status === 'OPENED').length;
-      const dc = dl.filter(r => r.clicked).length;
-      const oRate = pct(dop, ds), cRate = pct(dc, ds);
-      return `<tr>
-        <td><span class="badge badge-purple">Day ${d}</span></td>
-        <td>${ds}</td>
-        <td>${dop}</td>
-        <td><span class="rate ${rateClass(oRate)}">${oRate}</span></td>
-        <td>${dc}</td>
-        <td><span class="rate ${rateClass(cRate)}">${cRate}</span></td>
-      </tr>`;
-    }).join('') : '<tr><td colspan="7"><div class="empty-state">No data yet.</div></td></tr>';
+    // --- Day + Variant wise ---
+    const days     = [...new Set(emails.map(r => r.day).filter(d => d != null))].sort((a,b) => a-b);
+    const variants = [...new Set(emails.map(r => r.variant).filter(Boolean))].sort();
+
+    const dayVariantRows = [];
+    days.forEach(d => {
+      variants.forEach(v => {
+        const de  = emails.filter(r => r.day === d && r.variant === v);
+        if (!de.length) return;
+        const dl  = links.filter(r => r.day === d && r.variant === v);
+        const ds  = de.length;
+        const dop = de.filter(r => r.status === 'OPENED').length;
+        const dc  = dl.filter(r => r.clicked).length;
+        const oRate = pct(dop, ds), cRate = pct(dc, ds);
+        dayVariantRows.push(`<tr>
+          <td><span class="badge badge-purple">Day ${d}</span></td>
+          <td><span class="badge badge-purple">${esc(v)}</span></td>
+          <td>${ds}</td>
+          <td>${dop}</td>
+          <td><span class="rate ${rateClass(oRate)}">${oRate}</span></td>
+          <td>${dc}</td>
+          <td><span class="rate ${rateClass(cRate)}">${cRate}</span></td>
+        </tr>`);
+      });
+    });
+
+    document.getElementById('daysBody').innerHTML = dayVariantRows.length
+      ? dayVariantRows.join('')
+      : '<tr><td colspan="7"><div class="empty-state">No data yet.</div></td></tr>';
 
     // --- All emails ---
     const sorted = [...emails].sort((a,b) => new Date(b.sent_at) - new Date(a.sent_at));
