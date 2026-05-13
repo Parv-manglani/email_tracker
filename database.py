@@ -38,6 +38,16 @@ def init_db():
     """)
 
     cursor.execute("""
+    CREATE TABLE IF NOT EXISTS click_counter (
+        id TEXT PRIMARY KEY,
+        target_url TEXT,
+        click_count INTEGER DEFAULT 0,
+        created_at TIMESTAMP,
+        last_clicked_at TIMESTAMP
+    )
+    """)
+
+    cursor.execute("""
     CREATE TABLE IF NOT EXISTS link_tracking (
         id TEXT PRIMARY KEY,
         email TEXT,
@@ -69,6 +79,42 @@ def insert_email(uid, email, company, variant, day):
 
     conn.commit()
     conn.close()
+
+
+def insert_counter(uid, target_url):
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("""
+        INSERT INTO click_counter (id, target_url, click_count, created_at)
+        VALUES (%s, %s, 0, %s)
+    """, (uid, target_url, datetime.now()))
+    conn.commit()
+    conn.close()
+
+
+def increment_counter(uid):
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("""
+        UPDATE click_counter
+        SET click_count = click_count + 1,
+            last_clicked_at = %s
+        WHERE id = %s
+        RETURNING target_url
+    """, (datetime.now(), uid))
+    result = cursor.fetchone()
+    conn.commit()
+    conn.close()
+    return result[0] if result else None
+
+
+def get_all_counters():
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM click_counter ORDER BY created_at DESC")
+    rows = cursor.fetchall()
+    conn.close()
+    return [{"uid": r[0], "target_url": r[1], "click_count": r[2], "created_at": r[3], "last_clicked_at": r[4]} for r in rows]
 
 
 def insert_link(uid, email, company, variant, day, target_url):

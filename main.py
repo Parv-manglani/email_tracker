@@ -2,7 +2,7 @@ from fastapi import FastAPI, Response, Request
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import Optional
-from database import get_connection, init_db, insert_email, mark_as_opened, insert_link, mark_link_clicked
+from database import get_connection, init_db, insert_email, mark_as_opened, insert_link, mark_link_clicked, insert_counter, increment_counter, get_all_counters
 from utils import generate_uuid
 from email_verifier import verify_email
 
@@ -152,6 +152,36 @@ def get_links():
         })
 
     return {"data": data}
+
+
+# 🔹 Create click counter
+class CreateCounterRequest(BaseModel):
+    target_url: str
+
+@app.post("/create-counter")
+def create_counter(payload: CreateCounterRequest):
+    uid = generate_uuid()
+    insert_counter(uid, payload.target_url)
+    return {"uid": uid, "tracking_url": f"/c/{uid}"}
+
+
+# 🔹 Track click + redirect
+@app.get("/c/{uid}")
+def click_redirect(uid: str):
+    target_url = increment_counter(uid)
+    if not target_url:
+        return {"error": "Invalid link"}
+    html = f"""<!DOCTYPE html>
+<html><head><title>Redirecting...</title></head>
+<body><script>window.location.href = "{target_url}";</script></body>
+</html>"""
+    return Response(content=html, media_type="text/html")
+
+
+# 🔹 Get all counters
+@app.get("/get-counters")
+def get_counters():
+    return {"data": get_all_counters()}
 
 
 # 🔹 Verify email
