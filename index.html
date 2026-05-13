@@ -261,6 +261,7 @@
   <div class="tab" onclick="switchTab('days')">Day Wise</div>
   <div class="tab" onclick="switchTab('emails')">All Emails</div>
   <div class="tab" onclick="switchTab('links')">Link Clicks</div>
+  <div class="tab" onclick="switchTab('counters')">Link Counters</div>
 </div>
 
 <div class="container">
@@ -364,13 +365,31 @@
     </div>
   </div>
 
+  <!-- LINK COUNTERS -->
+  <div class="tab-content" id="tab-counters">
+    <div class="card">
+      <div class="card-header"><h2>Link Counters</h2></div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>UID</th><th>Target URL</th><th>Click Count</th><th>Created At</th><th>Last Clicked</th></tr>
+          </thead>
+          <tbody id="countersBody">
+            <tr><td colspan="5"><div class="empty-state">Loading…</div></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
 </div>
 
 <script>
   const BASE = 'https://email-tracker-azure-seven.vercel.app';
 
-  let emailData = [];
-  let linkData  = [];
+  let emailData   = [];
+  let linkData    = [];
+  let counterData = [];
 
   function switchTab(name) {
     document.querySelectorAll('.tab').forEach((t, i) => {
@@ -523,16 +542,30 @@
         <td class="ts" style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(r.target_url || '—')}</td>
       </tr>
     `).join('') : '<tr><td colspan="8"><div class="empty-state">No data yet.</div></td></tr>';
+
+    // --- Link counters ---
+    const counters = [...counterData].sort((a,b) => new Date(b.created_at) - new Date(a.created_at));
+    document.getElementById('countersBody').innerHTML = counters.length ? counters.map(r => `
+      <tr>
+        <td class="ts" style="font-family:monospace;color:#7c6af7">${esc(r.uid)}</td>
+        <td style="max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(r.target_url || '—')}</td>
+        <td><span style="color:#22c55e;font-weight:700;font-size:1rem">${r.click_count ?? 0}</span></td>
+        <td class="ts">${fmtDate(r.created_at)}</td>
+        <td class="ts">${fmtDate(r.last_clicked_at)}</td>
+      </tr>
+    `).join('') : '<tr><td colspan="5"><div class="empty-state">No counters yet.</div></td></tr>';
   }
 
   async function loadAll() {
     try {
-      const [e, l] = await Promise.all([
+      const [e, l, c] = await Promise.all([
         fetch(BASE + '/get-data').then(r => r.json()),
         fetch(BASE + '/get-links').then(r => r.json()),
+        fetch(BASE + '/get-counters').then(r => r.json()),
       ]);
-      emailData = e.data || [];
-      linkData  = l.data || [];
+      emailData   = e.data || [];
+      linkData    = l.data || [];
+      counterData = c.data || [];
       render();
     } catch (err) {
       console.error(err);
